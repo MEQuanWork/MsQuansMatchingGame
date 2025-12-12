@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Classroom Demos — MEQuanWork</title>
+  <style>
+    :root { --bg:#f7fafc; --card:#fff; --muted:#6b7280; --accent:#2563eb; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#111827; margin:0; padding:2rem; }
+    .container { max-width:900px; margin:auto; }
+    header { margin-bottom:1rem; }
+    h1 { margin:0 0 .25rem 0; font-size:1.75rem; }
+    p.lead { margin:0 0 1rem 0; color:var(--muted); }
+    .card { background:var(--card); padding:1rem; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    ul.demos { list-style:none; padding:0; margin:0; }
+    ul.demos li { padding:.5rem 0; border-bottom:1px solid #f1f5f9; }
+    a.demo-link { color:var(--accent); text-decoration:none; font-weight:600; }
+    footer { margin-top:1rem; color:var(--muted); font-size:.9rem; }
+    code { background:#f1f5f9; padding:.15rem .4rem; border-radius:4px; font-family:monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Classroom Demos</h1>
+      <p class="lead">A project site for small class demos. Click a demo to open it in a new tab.</p>
+    </header>
+
+    <section class="card">
+      <h2>Available demos</h2>
+      <ul class="demos">
+        <li><a class="demo-link" href="demos/demo-1.html" target="_blank" rel="noopener">Demo 1 — Plain text page</a></li>
+        <li><a class="demo-link" href="demos/demo-2.html" target="_blank" rel="noopener">Demo 2 — Example with CSS</a></li>
+        <!-- Add more demos here by creating new files in the demos/ folder -->
+      </ul>
+
+      <hr>
+
+      <h3>How to update</h3>
+      <ol>
+        <li>Open a file in this repo on GitHub and click the pencil icon to edit.</li>
+        <li>Commit the change to the <code>main</code> branch. Pages will redeploy automatically.</li>
+        <li>To add a new demo: click Add file → Create new file → name it <code>demos/demo-3.html</code>, paste content, commit.</li>
+      </ol>
+
+      <p style="margin-top:.5rem;color:var(--muted)">Tip: To show a plain text file as HTML, create a demo page and paste the text inside a &lt;pre&gt; or &lt;article&gt; element (see Demo 1).</p>
+    </section>
+
+    <footer>
+      Published with GitHub Pages — update files here to change content. Site will appear at <strong>https://MEQuanWork.github.io/classroom-demos/</strong> after you enable Pages.
+    </footer>
+  </div>
+</body>
+</html>
