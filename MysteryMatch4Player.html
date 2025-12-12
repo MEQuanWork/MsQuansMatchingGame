@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystery Match: Four-Player Greek & Latin (FIXED)</title>
+    
+    <style>
+        /* --- CSS STYLING --- */
+        
+        /* Define the custom colors */
+        :root {
+            --card-color: #8B008B; /* Dark Magenta */
+            --background-color: #000000; /* Black */
+            --text-color: #ffffff; /* White */
+            /* 4 distinct player colors */
+            --player1-color: #3498db; /* Blue */
+            --player2-color: #e74c3c; /* Red */
+            --player3-color: #2ecc71; /* Green */
+            --player4-color: #f1c40f; /* Gold/Yellow */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--background-color);
+            padding: 20px;
+            color: var(--text-color);
+            font-weight: bold; 
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- GREEK LETTER BACKGROUND EFFECT --- */
+        body::before {
+            content: "Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ 		      Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ 		      Ψ Ω";
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            font-size: 80px; 
+            line-height: 1.5;
+            word-wrap: break-word;
+            z-index: -1; 
+            opacity: 0.25; 
+            color: var(--card-color); 
+            pointer-events: none; 
+            text-align: justify;
+        }
+        
+        /* --- SCOREBOARD STYLING --- */
+        #scoreboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 1000px;
+            max-width: 95vw;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        .player-score {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+            color: var(--text-color);
+        }
+
+        #player1-score { background-color: var(--player1-color); }
+        #player2-score { background-color: var(--player2-color); }
+        #player3-score { background-color: var(--player3-color); }
+        #player4-score { background-color: var(--player4-color); } 
+
+        #player4-score h2, #player4-score .score-value {
+             color: var(--background-color);
+        }
+
+        .player-score h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.2em;
+        }
+
+        .player-score .score-value {
+            font-size: 2em;
+        }
+
+        .current-player {
+            transform: scale(1.05); 
+            border: 3px solid var(--text-color);
+            box-shadow: 0 0 20px var(--text-color);
+        }
+
+        /* --- CARD STYLING --- */
+        h1 {
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--card-color);
+            z-index: 10;
+        }
+        
+        #game-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 10px;
+            width: 1000px; 
+            max-width: 90vw;
+            perspective: 1000px;
+            z-index: 10;
+        }
+
+        .card {
+            background-color: var(--card-color); 
+            border-radius: 8px;
+            height: 120px;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            box-shadow: 0 0 15px rgba(139, 0, 139, 0.5);
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+            pointer-events: none;
+        }
+        
+        .card.match {
+            opacity: 0.1; 
+            box-shadow: none;
+            transition: opacity 1s, transform 0.6s;
+        }
+        
+        /* ADDED: Lock board input during match check */
+        .card.lock-input {
+            pointer-events: none; 
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .card-back {
+            background-color: var(--card-color);
+            border: 3px solid var(--text-color);
+            font-size: 4em; 
+            line-height: 1;
+        }
+
+        .card-front {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transform: rotateY(180deg);
+            padding: 10px;
+            box-sizing: border-box;
+            border: 3px solid var(--card-color);
+            text-transform: uppercase;
+        }
+        
+        .card-front[data-is-root="true"] {
+            font-size: 1.5em;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: var(--card-color);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--card-color);
+            z-index: 10;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            border: 2px solid var(--text-color);
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>❓ MYSTERY MATCH: Greek & Latin Roots ❓</h1>
+    <p>Click two cards to unveil the root and its meaning!</p>
+    
+    <div id="scoreboard">
+        <div id="player1-score" class="player-score">
+            <h2>P1 (Blue)</h2>
+            <div class="score-value">0</div>
+        </div>
+        <div id="player2-score" class="player-score">
+            <h2>P2 (Red)</h2>
+            <div class="score-value">0</div>
+        </div>
+        <div id="player3-score" class="player-score">
+            <h2>P3 (Green)</h2>
+            <div class="score-value">0</div>
+        </div>
+        <div id="player4-score" class="player-score">
+            <h2>P4 (Gold)</h2>
+            <div class="score-value">0</div>
+        </div>
+    </div>
+    
+    <div id="game-grid">
+        </div>
+
+    <div id="message"></div>
+    
+    <button onclick="startGame()">Restart Game</button>
+
+    <script>
+        // --- JAVASCRIPT LOGIC (FIXED) ---
+
+        const rootData = [
+            { root: "AQUA", meaning: "Water" },
+            { root: "BI", meaning: "Two" },
+            { root: "CHRON", meaning: "Time" },
+            { root: "DICT", meaning: "Speak" },
+            { root: "GRAPH", meaning: "Write" },
+            { root: "JUS", meaning: "Law/Right" },
+            { root: "LOC", meaning: "Place" },
+            { root: "MAL", meaning: "Bad/Evil" },
+            { root: "PED", meaning: "Foot" },
+            { root: "PHON", meaning: "Sound" },
+            { root: "PORT", meaning: "Carry" },
+            { root: "SCRIP", meaning: "Write" },
+            { root: "SOL", meaning: "Sun/Alone" },
+            { root: "TRACT", meaning: "Pull" },
+            { root: "VID", meaning: "See" },
+        ];
+
+        let cards = [];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let matchesFound = 0;
+        const totalMatches = rootData.length;
+
+        let currentPlayer = 1; 
+        let scores = { 1: 0, 2: 0, 3: 0, 4: 0 }; 
+        const totalPlayers = 4;
+
+        const gameGrid = document.getElementById('game-grid');
+        const messageDisplay = document.getElementById('message');
+        
+        const playerContainers = [
+            document.getElementById('player1-score'),
+            document.getElementById('player2-score'),
+            document.getElementById('player3-score'),
+            document.getElementById('player4-score')
+        ];
+
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function createBoard() {
+            cards = [];
+            rootData.forEach(pair => {
+                cards.push({ content: pair.root, isRoot: true, matchId: pair.root });
+                cards.push({ content: pair.meaning, isRoot: false, matchId: pair.root });
+            });
+
+            cards = shuffle(cards);
+
+            gameGrid.innerHTML = '';
+            cards.forEach(cardData => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.matchId = cardData.matchId;
+                cardElement.dataset.isRoot = cardData.isRoot;
+
+                cardElement.innerHTML = `
+                    <div class="card-face card-front">${cardData.content}</div>
+                    <div class="card-face card-back">?</div> 
+                `;
+
+                cardElement.addEventListener('click', flipCard);
+                gameGrid.appendChild(cardElement);
+            });
+        }
+
+        function flipCard() {
+            // Check if the board is locked OR if the clicked card is already flipped OR if the same card is clicked
+            if (lockBoard || this.classList.contains('is-flipped') || this === firstCard) return;
+
+            this.classList.add('is-flipped');
+            // NOTE: We don't need 'lock-input' here, 'is-flipped' combined with the check above prevents double clicking.
+            
+            if (!hasFlippedCard) {
+                // First card flipped
+                hasFlippedCard = true;
+                firstCard = this;
+            } else {
+                // Second card flipped
+                secondCard = this;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            lockBoard = true; // Lock board immediately after second card is flipped
+            const isMatch = firstCard.dataset.matchId === secondCard.dataset.matchId;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() {
+            matchesFound++;
+            
+            scores[currentPlayer]++;
+            updateScoreboard();
+
+            setTimeout(() => {
+                // Permanently mark as match
+                firstCard.classList.add('match');
+                secondCard.classList.add('match');
+                
+                // Remove listeners
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+
+                resetBoard();
+
+                if (matchesFound === totalMatches) {
+                    endGame();
+                }
+            }, 500);
+        }
+
+        function unflipCards() {
+            // lockBoard is already true from checkForMatch()
+            
+            setTimeout(() => {
+                // Flip cards back
+                firstCard.classList.remove('is-flipped');
+                secondCard.classList.remove('is-flipped');
+                
+                // Cycle player
+                currentPlayer = (currentPlayer % totalPlayers) + 1; 
+                updateScoreboard();
+                
+                resetBoard();
+            }, 1000);
+        }
+
+        /**
+         * Resets the board state for the next turn.
+         * The crucial fix is ensuring lockBoard is released.
+         */
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false]; // Resetting lockBoard here
+            [firstCard, secondCard] = [null, null];
+            
+            // Note: We no longer need to loop through all cards to remove 'lock-input' 
+            // since we removed the unnecessary application of that class in flipCard().
+        }
+        
+        function updateScoreboard() {
+            for (let i = 1; i <= totalPlayers; i++) {
+                const container = playerContainers[i - 1];
+                container.querySelector('.score-value').textContent = scores[i];
+                
+                if (i === currentPlayer) {
+                    container.classList.add('current-player');
+                } else {
+                    container.classList.remove('current-player');
+                }
+            }
+        }
+        
+        function endGame() {
+            const maxScore = Math.max(...Object.values(scores));
+            const winners = Object.keys(scores).filter(p => scores[p] === maxScore);
+            
+            let winnerMessage;
+            if (winners.length === 1) {
+                winnerMessage = `👑 Player ${winners[0]} Wins with ${maxScore} matches!`;
+            } else {
+                winnerMessage = `🤝 It's a Tie! Winners: ${winners.join(', ')} (with ${maxScore} matches each)`;
+            }
+
+            messageDisplay.textContent = winnerMessage;
+            lockBoard = true;
+        }
+
+
+        function startGame() {
+            [hasFlippedCard, lockBoard, firstCard, secondCard, matchesFound] = [false, false, null, null, 0];
+            scores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+            currentPlayer = 1; 
+            messageDisplay.textContent = '';
+            
+            createBoard();
+            updateScoreboard();
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
