@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greek and Latin Root Jeopardy</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #FFD700; font-size: 2.5rem; text-transform: uppercase; margin-bottom: 10px; }
+        
+        #scoreboard { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .team-box { background: #111; border: 2px solid #002366; padding: 10px; border-radius: 8px; min-width: 130px; }
+        .team-name { color: #FFD700; font-weight: bold; margin-bottom: 5px; }
+        .team-score { font-size: 1.5rem; margin-bottom: 8px; }
+        .score-btns button { padding: 5px 12px; cursor: pointer; border: none; border-radius: 3px; font-weight: bold; margin: 0 2px; }
+        .btn-plus { background: #28a745; color: white; }
+        .btn-minus { background: #dc3545; color: white; }
+
+        #game-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 1200px; margin: 0 auto; }
+        .category-header { background-color: #002366; padding: 15px; font-weight: bold; border: 2px solid #fff; border-radius: 5px; text-transform: uppercase; font-size: 0.9rem; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .tile { background-color: #002366; padding: 25px 0; font-size: 2rem; font-weight: bold; color: #FFD700; border: 2px solid #fff; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .tile.used { background-color: #222; color: #444; border-color: #333; cursor: default; }
+
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #modal-content { font-size: 2.5rem; margin-bottom: 30px; padding: 0 40px; max-width: 800px; }
+        .controls button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 5px; border: none; margin: 0 10px; font-weight: bold; }
+        .btn-show { background: #FFD700; color: #000; }
+        .btn-close { background: #fff; color: #000; }
+        .btn-reset { margin-top: 30px; background: #444; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Greek and Latin Root Jeopardy</h1>
+
+    <div id="scoreboard">
+        <script>
+            for(let i=1; i<=4; i++) {
+                document.write(`
+                    <div class="team-box">
+                        <div class="team-name">Team ${i}</div>
+                        <div class="team-score" id="s${i-1}">0</div>
+                        <div class="score-btns">
+                            <button class="btn-minus" onclick="updateScore(${i-1}, -100)">-</button>
+                            <button class="btn-plus" onclick="updateScore(${i-1}, 100)">+</button>
+                        </div>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+
+    <div id="game-board"></div>
+
+    <button class="btn-reset" onclick="resetGame()">Reset & Shuffle Columns</button>
+
+    <div id="modal">
+        <div id="modal-content"></div>
+        <div class="controls">
+            <button class="btn-show" onclick="showAnswer()">Show Answer</button>
+            <button class="btn-close" onclick="closeModal()">Back to Board</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = ["Earth & Water", "Sight & Sound", "Self & Life", "Action & Study", "Numbers & Words"];
+        
+        const questionBank = [
+            // Cat 0: Earth & Water
+            { q: "This Latin root means Earth.", a: "Terra", cat: 0 },
+            { q: "The root Hydro means this.", a: "Water", cat: 0 },
+            { q: "This root means Earth.", a: "Geo", cat: 0 },
+            { q: "This Latin root meaning water is used to describe things related to water.", a: "Aqua", cat: 0 },
+            { q: "The scientific study of the Earth's physical structure.", a: "Geology", cat: 0 },
+
+            // Cat 1: Sight & Sound
+            { q: "Root meaning to see.", a: "Vid / Vis", cat: 1 },
+            { q: "Root meaning sound.", a: "Phono", cat: 1 },
+            { q: "Root meaning light.", a: "Photo / Phos", cat: 1 },
+            { q: "Root meaning to look.", a: "Spect", cat: 1 },
+            { q: "Root meaning a viewing instrument.", a: "Scope", cat: 1 },
+
+            // Cat 2: Self & Life
+            { q: "Root meaning life.", a: "Bio", cat: 2 },
+            { q: "Root meaning self.", a: "Auto", cat: 2 },
+            { q: "The story of a person's life written by that person.", a: "Autobiography", cat: 2 },
+            { q: "A name for a tiny living organism.", a: "Microbe", cat: 2 },
+            { q: "This root refers to a self-moving vehicle.", a: "Auto", cat: 2 },
+
+            // Cat 3: Action & Study
+            { q: "Root meaning to carry.", a: "Port", cat: 3 },
+            { q: "Root meaning study of.", a: "Logy", cat: 3 },
+            { q: "Root meaning time.", a: "Chrono", cat: 3 },
+            { q: "The action of sailing around something.", a: "Circumnavigation", cat: 3 },
+            { q: "Root meaning to call.", a: "Voc / Vok", cat: 3 },
+
+            // Cat 4: Numbers & Words
+            { q: "Root meaning small.", a: "Micro", cat: 4 },
+            { q: "Root meaning one hundred.", a: "Cent", cat: 4 },
+            { q: "Root meaning to write.", a: "Scrib / Script", cat: 4 },
+            { q: "Root meaning good.", a: "Bene", cat: 4 },
+            { q: "A period of one hundred years.", a: "Century", cat: 4 }
+        ];
+
+        let scores = [0, 0, 0, 0];
+        let currentA = "";
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = "";
+
+            categories.forEach(c => {
+                const h = document.createElement('div');
+                h.className = 'category-header';
+                h.innerText = c;
+                board.appendChild(h);
+            });
+
+            let columns = [];
+            for (let i = 0; i < 5; i++) {
+                let catQuestions = questionBank.filter(q => q.cat === i);
+                columns.push(shuffle(catQuestions));
+            }
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const val = (row + 1) * 100;
+                    const item = columns[col][row];
+                    
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.innerText = `$${val}`;
+                    tile.onclick = () => {
+                        if(!tile.classList.contains('used')) {
+                            tile.classList.add('used');
+                            openModal(item.q, item.a);
+                        }
+                    };
+                    board.appendChild(tile);
+                }
+            }
+        }
+
+        function openModal(q, a) {
+            currentA = a;
+            document.getElementById('modal-content').innerText = q;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function showAnswer() {
+            document.getElementById('modal-content').innerHTML = `<span style="color:#FFD700">Answer:</span><br>${currentA}`;
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        function updateScore(t, amt) {
+            scores[t] += amt;
+            document.getElementById(`s${t}`).innerText = scores[t];
+        }
+
+        function resetGame() {
+            scores = [0, 0, 0, 0];
+            for(let i=0; i<4; i++) document.getElementById(`s${i}`).innerText = "0";
+            initBoard();
+        }
+
+        initBoard();
+    </script>
+</body>
+</html>
